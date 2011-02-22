@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="description" content="Time'n'Go is an online javascript stopwatch with a very rich interface">
+    <meta name="keywords" content="chronometer, stopwatch">
+    <meta name="robots" content="index,follow">
+    <title>Time'n'Go... by Stéfano Stypulkowski @ iceon.me</title>
+    
+    <link type="text/css" rel="stylesheet" href="resources/redline.css" />
+    
+    <script src="resources/jquery-1.5.min.js"></script>
+    
+    <script src="resources/jquery.disableSelection.1.js"></script>
+    
+    <script src="resources/jquery-ui-1.8.6.custom.min.js"></script>
+    
+    <script src="resources/redline.js"></script>
+    
+    <script src="resources/jquery.mousehold.js"></script>
+    
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-19972060-2']);
+      _gaq.push(['_setDomainName', '.iceon.me']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+  </head>
+  <body>
+    <div id="dial">
+      <div class="digit-case" id="minute_1">
+        <span class="digit">0</span>
+      </div>
+      <div class="digit-case" id="minute_2">
+        <span class="digit">0</span>
+      </div>
+      <div class="spacer"></div>
+      <div class="digit-case" id="second_1">
+        <span class="digit">0</span>
+      </div>
+      <div class="digit-case" id="second_2">
+        <span class="digit">0</span>
+      </div>
+      <div class="spacer"></div>
+      <div class="digit-case" id="millisecond_1">
+        <span class="digit" style="">0</span>
+      </div>
+      <div class="digit-case" id="millisecond_2">
+        <span class="digit" style="">0</span>
+      </div>
+      <div class="digit-case" id="millisecond_3">
+        <span class="digit" style="">0</span>
+      </div>
+      <div style="clear:both;"></div>
+    </div>
+    <div id="controls">
+      <button id="action" class="julian-button">Start</button>
+      <button id="reset" class="julian-button">Reset</button>
+      <div id="progress-bar">
+        <div id="progress-bar-rail">
+          <div id="progress-bar-evolutor"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="time-input-shadow"></div>
+    <div id="time-input-container">
+      <div id="time-input-header">
+        <span>Let's set the redline!</span>
+      </div>
+      <div class="time-input-group" id="time-input-group-minute">
+        <button id="time-input-increase-minutes" class="julian-button">Increase minutes</button>
+        <input id="time-input-minutes" maxlength="2"/>
+        <button id="time-input-decrease-minutes" class="julian-button">Decrease minutes</button>
+      </div>
+      <div class="time-input-group" id="time-input-group-second">
+        <button id="time-input-increase-seconds" class="julian-button">Increase minutes</button>
+        <input id="time-input-seconds" maxlength="2"/>
+        <button id="time-input-decrease-seconds" class="julian-button">Decrease minutes</button>
+      </div>
+      <button class="julian-button" id="set-time">Start with this redline</button>
+      <div style="clear:left;"></div>
+    </div>
+  </body>
+</html>
