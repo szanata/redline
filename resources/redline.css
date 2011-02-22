@@ -74,9 +74,15 @@ body{
   padding-left:5px;
 }
 #controls button{
-  width:200px;
   height:50px;
   float:left;
+}
+#action{
+  width:200px;
+}
+#restart,
+#reset{
+  width:100px;
 }
 #progress-bar{
   background: #FFFCFC; /* old browsers */

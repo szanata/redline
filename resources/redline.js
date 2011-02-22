@@ -13,10 +13,14 @@ String.prototype.padLeft = function (ch, num) {
   
   return re.exec(pad + this)[0];
 }
-
+/**
+* trunc implementation
+*/
 Number.prototype.trunc = function () {
   return this | 0;
 }
+
+
 
 $(function (){
 
@@ -68,11 +72,12 @@ $(function (){
     $('#time-input-seconds').val(String(c).padLeft('0',2));
   });
   
+  /**
+  * do for chrono
+  */
   $('#set-time').bind('click',function (){
     $('#time-input-shadow , #time-input-container').fadeOut(500);
     engine.setTime($('#time-input-minutes').val(),$('#time-input-seconds').val());
-    $('#action').bind('click',engine.action);
-    $('#reset').bind('click',engine.reset);
   });
 
   /**
@@ -94,72 +99,85 @@ $(function (){
   
   $('*').disableSelection();
   
-  /**
-  * fast change a digit on screen
-  */
-  function fastChange(name,digit){
-    
-    $(name).find('.digit').text(digit);
-  }
+
   
   /**
-  * exchange the digit, performing animation
+  * stopwatch engine v2
   */
-  function changeDigit(name,nextDigit,duration){
-
-    $(name).find('.digit').first().text(nextDigit);
-    
-    if (!$(name).find(':animated').size()){
-    
-      $(name).find('.pusher').animate({height:200},{
-      
-        duration: duration || 250,
-        complete: function (){
-            
-          $(this).siblings('div[data-current=true]').remove();
-          
-          $(this).siblings('.digit-wrapper').css('margin-top','0px');
-          
-          $(this).siblings('.digit-wrapper').attr('data-current','true');
-          
-          $(this).css('margin-top','-200px');
-          
-          $(this).html('<span class="digit"></span>');
-          
-          $(this).switchClass('pusher','digit-wrapper');
-          
-          $(this).parent().prepend('<div class="pusher"></div>');
-          
-          $(this).find('*').disableSelection();
-        }
-      });
-    }
-  }
-
   var engine = (function (){
   
     var
       time = 0,
-      difference = 0,
+      stoppedTimeAdjust = 0,
       totalTime = 0,
-      states = {STARTED:1,STOPPED:0,RESETED:3},
+      
+      minutes = '',
+      seconds = '',
+      
+      states = {STARTED:1,STOPPED:0,READY:2,OVER:3},
+      
       mmssThread = null,
       millisecondThread = null,
-      timeCheckThread = null,
+      evolutorThread = null,
+      
       lastMinutes = ['0','0'],
       lastSeconds = ['0','0'],
       lastMillis = ['0','0','0'],
-      state = states.STOPPED,
-      evolutorThread = null;
       
+      state = states.READY;
+      
+      
+    /**
+    * fast change a digit on screen
+    */
+    function fastChange(name,digit){
+      
+      $(name).find('.digit').text(digit);
+    }
+    
+    /**
+    * exchange the digit, performing animation
+    */
+    function changeDigit(name,nextDigit,duration){
+
+      $(name).find('.digit').first().text(nextDigit);
+      
+      if (!$(name).find(':animated').size()){
+      
+        $(name).find('.pusher').animate({height:200},{
+        
+          duration: duration || 250,
+          complete: function (){
+              
+            $(this).siblings('div[data-current=true]').remove();
+            
+            $(this).siblings('.digit-wrapper').css('margin-top','0px');
+            
+            $(this).siblings('.digit-wrapper').attr('data-current','true');
+            
+            $(this).css('margin-top','-200px');
+            
+            $(this).html('<span class="digit"></span>');
+            
+            $(this).switchClass('pusher','digit-wrapper');
+            
+            $(this).parent().prepend('<div class="pusher"></div>');
+            
+            $(this).find('*').disableSelection();
+          }
+        });
+      }
+    };
+  
     function reset(){
     
-      var resetThread = setInterval(function (){
-      
-        if (!$('#dial :animated').size()){
+      $('#action').unbind('click');
+      $('#reset').unbind('click');
+      $('#restart').unbind('click');
         
-          $('#action').unbind('click');
-          $('#reset').unbind('click');
+      var resetThread = setInterval(function (){
+          
+        if (!$('#dial :animated').size()){
         
           changeDigit("#minute_1",0);
           changeDigit("#minute_2",0);
@@ -168,32 +186,99 @@ $(function (){
           changeDigit("#millisecond_1",0);
           changeDigit("#millisecond_2",0);
           changeDigit("#millisecond_3",0);
-          clearInterval(resetThread);
-          
+
           $('#progress-bar-evolutor').width(0);
+          
+          state = states.OVER;
+          
+          clearInterval(resetThread);
         }
       },20);
-    }    
+    };   
     
     function stop(){
     
+      state = states.STOPPED;
+    
       clearInterval(mmssThread);
-      
       clearInterval(millisecondThread);
-
       clearInterval(evolutorThread);
       
-      difference = time - new Date();
+      stoppedTimeAdjust = time - new Date();
       
       $('#action').text('Start');
-    }
-        
+    };
+    
     function start(){
     
+      state = states.STARTED;
+      
       $('#action').text('Stop');
       
-      time = new Date(new Date().getTime() + difference);
+      time = new Date(new Date().getTime() + stoppedTimeAdjust);
       
+      setThreads();
+    };
+    
+    function applyReadyState(){
+    
+      $('#action').unbind('click');
+      
+      $('#reset').unbind('click');
+      
+      $('#restart').unbind('click');
+    
+      state = states.READY;
+      
+      stoppedTimeAdjust = time = totalTime = (Number(minutes) * 60000) + (Number(seconds) * 1000);
+    
+      lastMinutes = minutes.padLeft('0',2).split('');
+      
+      lastSeconds = seconds.padLeft('0',2).split('');
+      
+      lastMillis = ['0','0','0'];
+      
+      var resetThread = setInterval(function (){
+      
+        if (!$('#dial :animated').size()){
+          
+          changeDigit("#minute_1",lastMinutes[0]);
+          
+          changeDigit("#minute_2",lastMinutes[1]);
+          
+          changeDigit("#second_1",lastSeconds[0]);
+          
+          changeDigit("#second_2",lastSeconds[1]);
+          
+          changeDigit("#millisecond_1",'0');
+          
+          changeDigit("#millisecond_2",'0');
+          
+          changeDigit("#millisecond_3",'0');
+      
+          $('#progress-bar-evolutor').width(0);
+          
+          var rebindThread = setInterval(function (){
+            if (!$('#dial :animated').size()){
+              $('#action').bind('click',engine.action);
+          
+              $('#reset').bind('click',engine.reset);
+            
+              $('#restart').bind('click',engine.restart);
+              
+              clearInterval(rebindThread);
+            }
+          },20);
+          
+          clearInterval(resetThread);
+        }
+      },20);
+      
+      
+    };
+    
+    function setThreads(){
+    
       evolutorThread = setInterval(function (){
         var total = time - new Date();
         $('#progress-bar-evolutor').width((100 - Math.ceil(((total / totalTime) * 100))) * 4.4);
@@ -202,9 +287,6 @@ $(function (){
         }
       },1);
       
-      /**
-      * performs the milliseconds progress
-      */
       millisecondThread = setInterval(function (){
         
         var total = time - new Date();
@@ -271,47 +353,49 @@ $(function (){
           }
         }
       },201);
-    }
+    };
       
     return  {
       
       setTime: function (mm,ss) {
-        difference = time = totalTime = (Number(mm) * 60000) + (Number(ss) * 1000);
-        lastMinutes = mm.padLeft('0',2).split(''),
-        lastSeconds = ss.padLeft('0',2).split(''),
-        changeDigit("#minute_1",lastMinutes[0]);
-        changeDigit("#minute_2",lastMinutes[1]);
-        changeDigit("#second_1",lastSeconds[0]);
-        changeDigit("#second_2",lastSeconds[1]);
-        changeDigit("#millisecond_1",'0');
-        changeDigit("#millisecond_2",'0');
-        changeDigit("#millisecond_3",'0');
+      
+        minutes = mm;
+        
+        seconds = ss;
+      
+        applyReadyState();
+        
       },
 
       action: function (){
-
-        if (state === states.STOPPED || state === states.RESETED){
-    
-          state = states.STARTED;
-          
-          start();
-        
-        }else{
       
-          state = states.STOPPED;
-          
+        if (state === states.OVER){
+          return;
+        }
+        state === states.STARTED ? stop() : start();
+      },
+      
+      restart: function (){
+        
+        if (state === states.READY || state === states.OVER){
+          return;
+        }
+        
+        if (state === states.STARTED){
           stop();
         }
+
+        applyReadyState();
       },
     
       reset: function (){
       
+        if (state === states.OVER){
+          return;
+        }
         if (state === states.STARTED){
-        
           stop();
         }
-        
-        state = states.RESETED;
         
         reset();
 
