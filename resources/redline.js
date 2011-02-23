@@ -31,6 +31,24 @@ $(function (){
     }
   });
   
+  $('body').append('<div id="fx-player"></div>');
+  
+  $('#fx-player').jPlayer({
+    swfPath: 'resources/',
+    preload: 'metadata',
+    solution: 'html, flash',
+    volume: 1,
+    ready: function() {
+      $(this).jPlayer( 'setMedia', {
+        wav: 'resources/beep.wav',
+        mp3: 'resources/beep.mp3',
+        oga: 'resources/beep.ogg',
+        m4a: 'resources/beep.mp4'
+      }).jPlayer('load');
+    },
+    supplied: 'wav, m4a, oga, mp3'
+  });
+  
   //time select commands
   $('#time-input-minutes, #time-input-seconds').val('00');
   $('#time-input-minutes, #time-input-seconds').bind('input keyup paste drop',function (e){
@@ -196,8 +214,11 @@ $(function (){
       },20);
     };   
     
-    function stop(){
+    function stop(timeEnds){
     
+      if (timeEnds){
+        $('#fx-player').jPlayer('play');
+      }
       state = states.STOPPED;
     
       clearInterval(mmssThread);
@@ -292,7 +313,7 @@ $(function (){
         var total = time - new Date();
         
         if (total <= 0){
-          stop();
+          stop(true);
           fastChange('#millisecond_1',0);
           fastChange('#millisecond_2',0);
           fastChange('#millisecond_3',0);
