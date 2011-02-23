@@ -43,7 +43,7 @@ $(function (){
         wav: 'resources/beep.wav',
         mp3: 'resources/beep.mp3',
         oga: 'resources/beep.ogg',
-        m4a: 'resources/beep.mp4'
+        m4a: 'resources/beep.m4a'
       }).jPlayer('load');
     },
     supplied: 'wav, m4a, oga, mp3'
